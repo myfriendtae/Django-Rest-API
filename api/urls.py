@@ -12,4 +12,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('test-api/', views.HelloApiView.as_view()),
     path('login/', views.UserLoginApiView.as_view()),
+    path('movie/', views.MovieApiView),
 ]

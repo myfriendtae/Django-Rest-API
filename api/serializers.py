@@ -44,3 +44,8 @@ class ProfileFeedItemSerializer(serializers.ModelSerializer):
             }
         }
 
+class MovieSerializer(serializers.ModelSerializer):
+    """ Serialises movie items """
+    class Meta:
+        model = models.Movie
+        fields = ('name', 'released_date', 'genre',)

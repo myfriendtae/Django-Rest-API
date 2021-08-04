@@ -1,7 +1,8 @@
 from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
 
 from rest_framework import viewsets
-from .models import UserProfile
+from .models import UserProfile, Movie
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,13 +12,15 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework import filters
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from restapi.permissions import SalesOnly
 # from rest_framework.permissions import IsAuthenticated
 
 from api import serializers
 from api import models
 from api import permissions
 
+from rest_framework.decorators import api_view
 
 class HelloApiView(APIView):
     """Test API view"""
@@ -63,6 +66,7 @@ class HelloViewSet(viewsets.ViewSet):
     '''Test API viewset'''
 
     serializer_class = serializers.HelloSerializer
+    permission_classes = [SalesOnly]
 
     def list(self, request):
         '''Return hello message'''
@@ -131,3 +135,12 @@ class UserProfileFeedViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         '''Sets the user profile to the logged in user'''
         serializer.save(user_profile=self.request.user)
+
+@api_view(['GET'])
+def MovieApiView(request):
+    """ View to list all movies in the system.
+    """
+    if request.method == 'GET':
+        data = models.Movie.objects.values()
+        serializer = serializers.MovieSerializer(data, many=True)
+        return Response(data=serializer.data, status=200)

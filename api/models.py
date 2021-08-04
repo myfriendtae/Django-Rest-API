@@ -65,3 +65,9 @@ class ProfileFeedItem(models.Model):
     def __str__(self):
         '''Return the modeol as string'''
         return self.status_text
+
+class Movie(models.Model):
+    '''Movie information'''
+    name = models.CharField(max_length=60)
+    released_date = models.DateField()
+    genre = models.CharField(max_length=20)
