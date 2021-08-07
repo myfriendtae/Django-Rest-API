@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from api.models import UserProfile
 
 class ModelTests(TestCase):
     def test_create_user_with_email_successful(self):
@@ -27,7 +28,7 @@ class ModelTests(TestCase):
 
     def test_create_new_super_user(self):
         """Test creating super user"""
-        user = get_user_model().objects.create_superuser(
+        user = UserProfile.objects.create_superuser(
             'test@gmail.com',
             'master123',
             'master123'

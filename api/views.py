@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from .models import UserProfile, Movie
 
 from rest_framework.views import APIView
@@ -144,3 +144,7 @@ def MovieApiView(request):
         data = models.Movie.objects.values()
         serializer = serializers.MovieSerializer(data, many=True)
         return Response(data=serializer.data, status=200)
+
+class CreateUserView(generics.CreateAPIView):
+    """ Create """
+    serializer_class = serializers.UserSerializer
