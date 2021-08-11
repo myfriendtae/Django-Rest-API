@@ -19,6 +19,6 @@ class UpdateOwnSatus(permissions.BasePermission):
 class SalesOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         print(view)
-        if request.user.groups.filter(name="Sales").exists() and request.method in ['GET', 'POST']:
+        if request.user.groups.filter(name='Sales').exists() and request.method in ['GET', 'POST']:
             return True
         return False
