@@ -3,9 +3,6 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext as _
 from api import models
 
-admin.site.register(models.ProfileFeedItem)
-admin.site.register(models.Movie)
-
 class UserAdmin(BaseUserAdmin):
     ordering = ['id']
     list_display = ['email', 'name']

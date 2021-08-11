@@ -52,22 +52,3 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         """Return string representation of user"""
         return self.email
-
-class ProfileFeedItem(models.Model):
-    '''Profile status update'''
-    user_profile = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE
-    )
-    status_text = models.CharField(max_length=255)
-    created_on = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        '''Return the modeol as string'''
-        return self.status_text
-
-class Movie(models.Model):
-    '''Movie information'''
-    name = models.CharField(max_length=60)
-    released_date = models.DateField()
-    genre = models.CharField(max_length=20)
