@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 from api.models import Tag
 from business.serializers import TagSerializer
 
+
 TAG_URL = reverse('business:tag-list')
 
 

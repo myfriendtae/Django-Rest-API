@@ -77,3 +77,17 @@ class Task(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Business(models.Model):
+    """ Business object """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    title = models.CharField(max_length=255)
+    task = models.ManyToManyField('Task')
+    tag = models.ManyToManyField('Tag')
+
+    def __str__(self):
+        return self.title

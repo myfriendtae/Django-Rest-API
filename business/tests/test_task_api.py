@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 from api.models import Task
 from business.serializers import TaskSerializer
 
+
 TASK_URL = reverse('business:task-list')
 
 
