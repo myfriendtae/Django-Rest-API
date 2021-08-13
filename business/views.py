@@ -2,7 +2,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from api.models import Tag
+from api.models import Tag, Task
 from business import serializers
 
 class TagViewSet(   viewsets.GenericViewSet, 
@@ -21,3 +21,16 @@ class TagViewSet(   viewsets.GenericViewSet,
     def perform_create(self, serializer):
         """ Create a new tag """
         serializer.save(user=self.request.user)
+        
+        
+class TaskViewSet( viewsets.GenericViewSet,
+                    mixins.ListModelMixin):
+    """ Manage tasks in the database """
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Task.objects.all()
+    serializer_class = serializers.TaskSerializer
+
+    def get_queryset(self):
+        """ Return objects for the current autehticated user only """
+        return self.queryset.filter(user=self.request.user).order_by('-name')    

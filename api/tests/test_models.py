@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user, get_user_model
-from api.models import UserProfile, Tag
+from api.models import UserProfile, Tag, Task
 
 
 def sample_user(email='user@email.com', password='testpass'):
@@ -49,3 +49,11 @@ class ModelTests(TestCase):
             name='Sales'
         )
         self.assertEqual(str(tag), tag.name)
+
+    def test_task_str(self):
+        """ Test the task string respresentation """
+        task = Task.objects.create(
+            user=sample_user(),
+            name='stock returns'
+        )
+        self.assertEqual(str(task), task.name)
