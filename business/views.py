@@ -5,37 +5,30 @@ from rest_framework.permissions import IsAuthenticated
 from api.models import Tag, Task
 from business import serializers
 
-class TagViewSet(viewsets.GenericViewSet, 
-                mixins.ListModelMixin, 
-                mixins.CreateModelMixin):
-    """ Manage tags in the database """
+
+class BaseAttrViewSet(viewsets.GenericViewSet,
+                    mixins.ListModelMixin,
+                    mixins.CreateModelMixin):
+    """ Base viewset for user owned  attributes """
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = Tag.objects.all()
-    serializer_class = serializers.TagSerializer
 
     def get_queryset(self):
         """ Return objects for the current authenticated user only """
         return self.queryset.filter(user=self.request.user).order_by('-name')
 
     def perform_create(self, serializer):
-        """ Create a new tag """
+        """ create a new object """
         serializer.save(user=self.request.user)
+
+
+class TagViewSet(BaseAttrViewSet):
+    """ Manage tags in the database """
+    queryset = Tag.objects.all()
+    serializer_class = serializers.TagSerializer
         
         
-class TaskViewSet(viewsets.GenericViewSet,
-                mixins.ListModelMixin,
-                mixins.CreateModelMixin):
+class TaskViewSet(BaseAttrViewSet):
     """ Manage tasks in the database """
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     queryset = Task.objects.all()
     serializer_class = serializers.TaskSerializer
-
-    def get_queryset(self):
-        """ Return objects for the current autehticated user only """
-        return self.queryset.filter(user=self.request.user).order_by('-name')
-
-    def perform_create(self, serializer):
-        """ Create a new task """
-        serializer.save(user=self.request.user)
