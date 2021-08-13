@@ -1,9 +1,9 @@
 # REST API project
 
 # Getting started
-Superuser: master@gmail.com
+Superuser: master@email.com
 Name: master
-Password: Password
+Password: Password123
 
 # Basic requirements
 1. create new profile
