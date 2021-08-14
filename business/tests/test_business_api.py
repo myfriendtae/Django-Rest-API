@@ -26,7 +26,7 @@ def sample_task(user, name='sending sales infor to the order management'):
 def sample_business(user, **params):
     """ Create and return a sample recipe """
     defaults = {
-        'title': 'Butter',
+        'title': 'sales',
     }
     defaults.update(params)
     return Business.objects.create(user=user, **defaults)
@@ -95,3 +95,54 @@ class PrivateBusinessApiTests(TestCase):
 
         serializer = BusinessDetailSerializer(business)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_basic_business(self):
+        """ Test creating business """
+        payload = {
+            'title': 'sales',
+        }
+        res = self.client.post(BUSINESS_URL, payload)
+        
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        
+        business = Business.objects.get(id=res.data['id'])
+        for key in payload.keys():
+            self.assertEqual(payload[key], getattr(business, key))
+
+    def test_create_business_with_tags(self):
+        """ Test creating a business with tags """
+        tag1 = sample_tag(user=self.user, name='sales team')
+        tag2 = sample_tag(user=self.user, name='order management team')
+        payload = {
+            'title': 'sales',
+            'tag': [tag1.id, tag2.id]
+        }
+        res = self.client.post(BUSINESS_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        business = Business.objects.get(id=res.data['id'])
+        tags = business.tag.all()
+
+        self.assertEqual(tags.count(), 2)
+        self.assertIn(tag1, tags)
+        self.assertIn(tag2, tags)
+
+    def test_create_business_with_task(self):
+        """ Test creating a business with tasks """
+        task1 = sample_task(user=self.user, name='finding new customers')
+        task2 = sample_task(user=self.user, name='collecting feedback from customers')
+        payload = {
+            'title': 'sales',
+            'task': [task1.id, task2.id]
+        }
+        res = self.client.post(BUSINESS_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        business = Business.objects.get(id=res.data['id'])
+        tasks = business.task.all()
+
+        self.assertEqual(tasks.count(), 2)
+        self.assertIn(task1, tasks)
+        self.assertIn(task2, tasks)

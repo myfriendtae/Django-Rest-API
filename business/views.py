@@ -43,10 +43,14 @@ class BusinessViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """ Retrieve the objects for the authenticated user """
-        return self.queryset.filter(user=self.request.user)
+        return self.queryset.filter(user=self.request.user).order_by('-id')
 
     def get_serializer_class(self):
         """ Return serializer class"""
         if self.action == 'retrieve':
             return serializers.BusinessDetailSerializer
         return self.serializer_class
+
+    def perform_create(self, serializer):
+        """ Create a new business """
+        serializer.save(user=self.request.user)

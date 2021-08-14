@@ -18,7 +18,7 @@ class TaskSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
 
-class BusinessSerializer(serializers.Serializer):
+class BusinessSerializer(serializers.ModelSerializer):
     """ Serializer for business objects"""
     tag = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -31,12 +31,11 @@ class BusinessSerializer(serializers.Serializer):
 
     class Meta:
         model = Business
-        fields = ('id', 'title',)
+        fields = ('id', 'title', 'tag', 'task',)
         read_only_fields = ('id',)
 
 
-class BusinessDetailSerializer(serializers.Serializer):
+class BusinessDetailSerializer(BusinessSerializer):
     """ Serializer for a business detail """
     tag = TagSerializer(many=True, read_only=True)
     task = TaskSerializer(many=True, read_only=True)
-    
