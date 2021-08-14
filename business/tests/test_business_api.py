@@ -19,7 +19,7 @@ def sample_tag(user, name='sales team'):
     """ Create and return a sample tag """
     return Tag.objects.create(user=user, name=name)
 
-def sample_task(user, name='sending sales infor to the order management'):
+def sample_task(user, name='sending sales info to the order management'):
     """ create and return a sample task """
     return Task.objects.create(user=user, name=name)
 
@@ -146,3 +146,37 @@ class PrivateBusinessApiTests(TestCase):
         self.assertEqual(tasks.count(), 2)
         self.assertIn(task1, tasks)
         self.assertIn(task2, tasks)
+
+    def test_partial_update_business(self):
+        """ Test updating a business with patch """
+        business = sample_business(user=self.user)
+        business.tag.add(sample_tag(user=self.user))
+        business.task.add(sample_task(user=self.user))
+        new_tag = sample_tag(user=self.user, name='sending sample request to export admin team')
+
+        payload = { 'title': 'sales', 'tag': [new_tag.id] }
+        url = detail_url(business.id)
+        self.client.patch(url, payload)
+
+        business.refresh_from_db()
+        self.assertEqual(business.title, payload['title'])
+        
+        tags = business.tag.all()
+        self.assertEqual(tags.count(), 1)
+        self.assertIn(new_tag, tags)
+
+    def test_full_update_business(self):
+        """ Test updating a business with put """
+        business = sample_business(user=self.user)
+        business.tag.add(sample_tag(user=self.user))
+        payload = {
+            'title': 'sales',
+        }
+        url = detail_url(business.id)
+        self.client.put(url, payload)
+
+        business.refresh_from_db()
+        self.assertEqual(business.title, payload['title'])
+        
+        tags = business.tag.all()
+        self.assertEqual(tags.count(), 0)
