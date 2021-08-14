@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.models import Tag, Task
+from api.models import Tag, Task, Business
 
 class TagSerializer(serializers.ModelSerializer):
     """ Serializer for tag objects """
@@ -11,8 +11,25 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    """ Serializer for task objexts """
+    """ Serializer for task objects """
     class Meta:
         model = Task
         fields = ('id', 'name')
+        read_only_fields = ('id',)
+
+
+class BusinessSerializer(serializers.Serializer):
+    """ Serializer for business objects"""
+    tag = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Tag.objects.all()
+    )
+    task = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Task.objects.all()
+    )
+
+    class Meta:
+        model = Business
+        fields = ('id', 'title',)
         read_only_fields = ('id',)

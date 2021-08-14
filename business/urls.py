@@ -7,6 +7,7 @@ from business import views
 router = DefaultRouter()
 router.register('tags', views.TagViewSet)
 router.register('tasks', views.TaskViewSet)
+router.register('business', views.BusinessViewSet)
 
 app_name = 'business'
 
