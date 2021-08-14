@@ -33,3 +33,10 @@ class BusinessSerializer(serializers.Serializer):
         model = Business
         fields = ('id', 'title',)
         read_only_fields = ('id',)
+
+
+class BusinessDetailSerializer(serializers.Serializer):
+    """ Serializer for a business detail """
+    tag = TagSerializer(many=True, read_only=True)
+    task = TaskSerializer(many=True, read_only=True)
+    

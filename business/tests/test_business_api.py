@@ -1,14 +1,27 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase, testcases
+from django.test import TestCase
 from django.urls import reverse
 
-from rest_framework import serializers, status
+from rest_framework import status
 from rest_framework.test import APIClient
 
-from api.models import Business
-from business.serializers import BusinessSerializer
+from api.models import Business, Tag, Task
+from business.serializers import BusinessSerializer, BusinessDetailSerializer
 
 BUSINESS_URL = reverse('business:business-list')
+
+
+def detail_url(business_id):
+    """ Return business detail URL """
+    return reverse('business:business-detail', args=[business_id])
+
+def sample_tag(user, name='sales team'):
+    """ Create and return a sample tag """
+    return Tag.objects.create(user=user, name=name)
+
+def sample_task(user, name='sending sales infor to the order management'):
+    """ create and return a sample task """
+    return Task.objects.create(user=user, name=name)
 
 def sample_business(user, **params):
     """ Create and return a sample recipe """
@@ -69,4 +82,16 @@ class PrivateBusinessApiTests(TestCase):
         
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
+        self.assertEqual(res.data, serializer.data)
+
+    def test_view_business_detail(self):
+        """ Test viewing a business detail """
+        business = sample_business(user=self.user)
+        business.tag.add(sample_tag(user=self.user))
+        business.task.add(sample_task(user=self.user))
+        
+        url = detail_url(business.id)
+        res = self.client.get(url)
+
+        serializer = BusinessDetailSerializer(business)
         self.assertEqual(res.data, serializer.data)
