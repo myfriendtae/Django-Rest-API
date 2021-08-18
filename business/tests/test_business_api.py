@@ -1,3 +1,8 @@
+import tempfile
+import os
+
+from PIL import Image
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -10,6 +15,9 @@ from business.serializers import BusinessSerializer, BusinessDetailSerializer
 
 BUSINESS_URL = reverse('business:business-list')
 
+def image_upload_url(business_id):
+    """ Return URL for business image upload """
+    return reverse('business:business-upload-image', args=[business_id])
 
 def detail_url(business_id):
     """ Return business detail URL """
@@ -180,3 +188,38 @@ class PrivateBusinessApiTests(TestCase):
         
         tags = business.tag.all()
         self.assertEqual(tags.count(), 0)
+
+    
+class BusinessImageUploadTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            'user@email.com',
+            'Password123'
+        )
+        self.client.force_authenticate(self.user)
+        self.business = sample_business(user=self.user)
+
+    def tearDown(self):
+        self.business.image.delete()
+
+    def test_upload_image_to_business(self):
+        """ Test uploading an image to business """
+        url = image_upload_url(self.business.id)
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as ntf:
+            img = Image.new('RGB', (10, 10))
+            img.save(ntf, format='jpeg')
+            ntf.seek(0)
+            res = self.client.post(url, {'image': ntf}, format='multipart')
+
+        self.business.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('image', res.data)
+        self.assertTrue(os.path.exists(self.business.image.path))
+
+    def test_upload_image_bad_request(self):
+        """ Test uploading an invalid image """
+        url = image_upload_url(self.business.id)
+        res = self.client.post(url, {'image': 'notImage'}, format='multipart')
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        

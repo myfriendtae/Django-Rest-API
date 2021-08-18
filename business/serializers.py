@@ -39,3 +39,11 @@ class BusinessDetailSerializer(BusinessSerializer):
     """ Serializer for a business detail """
     tag = TagSerializer(many=True, read_only=True)
     task = TaskSerializer(many=True, read_only=True)
+
+
+class BusinessImageSerializer(serializers.ModelSerializer):
+    """ Serializer for uploading images to busines """
+    class Meta:
+        model = Business
+        fields = ('id', 'image',)
+        read_only_fields = ('id',)

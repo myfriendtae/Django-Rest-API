@@ -126,8 +126,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
-MEDIA_ROOT = '/vol/web/media'
-STATIC_ROOT = '/vol/web/static'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'web/media')
+STATIC_ROOT = os.path.join(BASE_DIR, 'web/static')
 
 AUTH_USER_MODEL = 'api.UserProfile'
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
