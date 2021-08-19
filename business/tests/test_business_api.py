@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.test import APIClient
 
 from api.models import Business, Tag, Task
@@ -223,3 +223,46 @@ class BusinessImageUploadTests(TestCase):
         res = self.client.post(url, {'image': 'notImage'}, format='multipart')
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         
+    def test_filter_business_by_tags(self):
+        """ Test filtering business with specific tags """
+        business1 = sample_business(user=self.user, title='skim milk')
+        business2 = sample_business(user=self.user, title='butter')
+        tag1 = sample_tag(user=self.user, name='sales manager')
+        tag2 = sample_tag(user=self.user, name='order management officer')
+
+        business1.tag.add(tag1)
+        business2.tag.add(tag2)
+
+        business3= sample_business(user=self.user, title='whole milk')
+        res = self.client.get(
+            BUSINESS_URL,
+            {'tag': f'{tag1.id},{tag2.id}'}
+        )
+        serializer1 = BusinessSerializer(business1)
+        serializer2 = BusinessSerializer(business2)
+        serializer3 = BusinessSerializer(business3)
+        self.assertIn(serializer1.data, res.data)
+        self.assertIn(serializer2.data, res.data)
+        self.assertNotIn(serializer3.data, res.data)
+
+    def test_filter_business_by_task(self):
+        """ Test filtering business with specific tasks """
+        business1 = sample_business(user=self.user, title='butter')
+        business2 = sample_business(user=self.user, title='skim milk')
+        task1 = sample_task(user=self.user, name='finding a new customer')
+        task2 = sample_task(user=self.user, name='analysing sales trends')
+        business1.task.add(task1)
+        business2.task.add(task2)
+        business3 = sample_business(user=self.user, title='entering orders')
+
+        res = self.client.get(
+            BUSINESS_URL,
+            {'task': f'{task1.id},{task2.id}'}
+        )
+        serializer1 = BusinessSerializer(business1)
+        serializer2 = BusinessSerializer(business2)
+        serializer3 = BusinessSerializer(business3)
+        self.assertIn(serializer1.data, res.data)
+        self.assertIn(serializer2.data, res.data)
+        self.assertNotIn(serializer3.data, res.data)
+
