@@ -5,7 +5,8 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from api.models import Tag
+from api.models import Tag, Business
+from business import serializers
 from business.serializers import TagSerializer
 
 
@@ -78,3 +79,38 @@ class PrivateTagApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_retrieve_tags_assigned_to_business(self):
+        """ Test filtering tags by those assigned to busienss """
+        tag1 = Tag.objects.create(user=self.user, name='order management')
+        tag2 = Tag.objects.create(user=self.user, name='sales')
+        business = Business.objects.create(
+            title='sales',
+            user=self.user
+        )
+        business.tag.add(tag1)
+        res = self.client.get(TAG_URL, {'assigned_only': 1})
+
+        serializer1 = TagSerializer(tag1)
+        serializer2 = TagSerializer(tag2)
+        self.assertIn(serializer1.data, res.data)
+        self.assertNotIn(serializer2.data, res.data)
+
+    def test_retrieve_tags_assiged_unique(self):
+        """ Test filtering tags by assigned to unique items """
+        tag1 = Tag.objects.create(user=self.user, name='sales')
+        tag2 = Tag.objects.create(user=self.user, name='order management')
+
+        business1 = Business.objects.create(
+            title='sales',
+            user=self.user
+        )
+        business1.tag.add(tag1)
+
+        business2 = Business.objects.create(
+            title='order management',
+            user=self.user
+        )
+        business2.tag.add(tag1)
+
+        res = self.client.get(TAG_URL, {'assigned_only': 1})
+        self.assertEqual(len(res.data), 1)

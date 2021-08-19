@@ -5,7 +5,7 @@ from django.test import TestCase
 from rest_framework import serializers, status
 from rest_framework.test import APIClient
 
-from api.models import Task
+from api.models import Task, Business
 from business.serializers import TaskSerializer
 
 
@@ -77,3 +77,39 @@ class PrivateTaskApiTests(TestCase):
         res = self.client.post(TASK_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_retrieve_tasks_assigned_to_business(self):
+        """ Test filtering tasks by those assigned to busienss """
+        task1 = Task.objects.create(user=self.user, name='finding a new customer')
+        task2 = Task.objects.create(user=self.user, name='analysising a sales trend')
+        business = Business.objects.create(
+            title='sales',
+            user=self.user
+        )
+        business.task.add(task1)
+        res = self.client.get(TASK_URL, {'assigned_only': 1})
+
+        serializer1 = TaskSerializer(task1)
+        serializer2 = TaskSerializer(task2)
+        self.assertIn(serializer1.data, res.data)
+        self.assertNotIn(serializer2.data, res.data)
+
+    def test_retrieve_tasks_assiged_unique(self):
+        """ Test filtering tasks by assigned to unique items """
+        task1 = Task.objects.create(user=self.user, name='finding a new customer')
+        task2 = Task.objects.create(user=self.user, name='analysising a sales trend')
+
+        business1 = Business.objects.create(
+            title='sales',
+            user=self.user
+        )
+        business1.task.add(task1)
+
+        business2 = Business.objects.create(
+            title='order management',
+            user=self.user
+        )
+        business2.task.add(task1)
+
+        res = self.client.get(TASK_URL, {'assigned_only': 1})
+        self.assertEqual(len(res.data), 1)

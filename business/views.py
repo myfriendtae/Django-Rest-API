@@ -1,3 +1,4 @@
+from django.db.models import query
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import viewsets, mixins, status
@@ -17,7 +18,13 @@ class BaseAttrViewSet(viewsets.GenericViewSet,
 
     def get_queryset(self):
         """ Return objects for the current authenticated user only """
-        return self.queryset.filter(user=self.request.user).order_by('-name')
+        assigned_only = bool(
+            int(self.request.query_params.get('assigned_only', 0))
+        )
+        queryset = self.queryset
+        if assigned_only:
+            queryset = queryset.filter(business__isnull=False)
+        return queryset.filter(user=self.request.user).order_by('-name').distinct()
 
     def perform_create(self, serializer):
         """ create a new object """
